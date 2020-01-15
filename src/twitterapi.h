@@ -274,8 +274,6 @@ private slots:
     void genericHandlerFinished(FINISHED_ARGS(ApiResultList));
     void genericHandlerFailure(FAILURE_ARGS);
 
-    void handleVerifyCredentialsSuccessful();
-    void handleVerifyCredentialsError(QNetworkReply::NetworkError error);
     void handleAccountSettingsSuccessful();
     void handleAccountSettingsError(QNetworkReply::NetworkError error);
     void handleHelpConfigurationSuccessful();

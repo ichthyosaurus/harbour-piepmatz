@@ -167,21 +167,11 @@ void TwitterApi::genericHandlerFailure(const QString& title, QNetworkReply* repl
 
 void TwitterApi::verifyCredentials()
 {
-    qDebug() << "TwitterApi::verifyCredentials";
-
 //    if (!wagnis->hasFeature("contribution") && wagnis->getRemainingTime() == 0) {
 //        emit verifyCredentialsError("You haven't completed the registration process!");
 //        return;
 //    }
-
-    QUrl url = QUrl(API_ACCOUNT_VERIFY_CREDENTIALS);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleVerifyCredentialsError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleVerifyCredentialsSuccessful()));
+    genericRequest(API_ACCOUNT_VERIFY_CREDENTIALS, STANDARD_REQ(TwitterApi::verifyCredentials));
 }
 
 void TwitterApi::accountSettings()
