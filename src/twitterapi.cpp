@@ -1112,6 +1112,8 @@ void TwitterApi::handleFollowUserFinished()
     if (jsonDocument.isObject()) {
         QJsonObject responseObject = jsonDocument.object();
         // Sometimes, Twitter still says "following": true here - strange isn't it?
+        // -> see https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create:
+        // -> "Actions taken in this method are asynchronous. Changes will be eventually consistent."
         responseObject.remove("following");
         responseObject.insert("following", QJsonValue(true));
         emit followUserSuccessful(responseObject.toVariantMap());
