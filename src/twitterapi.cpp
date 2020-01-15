@@ -176,371 +176,114 @@ void TwitterApi::verifyCredentials()
 
 void TwitterApi::accountSettings()
 {
-    qDebug() << "TwitterApi::accountSettings";
-    QUrl url = QUrl(API_ACCOUNT_SETTINGS);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleAccountSettingsError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleAccountSettingsSuccessful()));
+    genericRequest(API_ACCOUNT_SETTINGS, STANDARD_REQ(TwitterApi::accountSettings));
 }
 
 void TwitterApi::helpConfiguration()
 {
-    qDebug() << "TwitterApi::helpConfiguration";
-    QUrl url = QUrl(API_HELP_CONFIGURATION);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleHelpConfigurationError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleHelpConfigurationSuccessful()));
+    genericRequest(API_HELP_CONFIGURATION, STANDARD_REQ(TwitterApi::helpConfiguration));
 }
 
 void TwitterApi::helpPrivacy()
 {
-    qDebug() << "TwitterApi::helpPrivacy";
-    QUrl url = QUrl(API_HELP_PRIVACY);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleHelpPrivacyError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleHelpPrivacySuccessful()));
+    genericRequest(API_HELP_PRIVACY, STANDARD_REQ(TwitterApi::helpPrivacy));
 }
 
 void TwitterApi::helpTos()
 {
-    qDebug() << "TwitterApi::helpTos";
-    QUrl url = QUrl(API_HELP_TOS);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleHelpTosError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleHelpTosSuccessful()));
+    genericRequest(API_HELP_TOS, STANDARD_REQ(TwitterApi::helpTos));
 }
 
-void TwitterApi::handleVerifyCredentialsSuccessful()
+void TwitterApi::postTweetRequest(const QString &title, TwitterApi::ParametersList parameters)
 {
-    qDebug() << "TwitterApi::handleVerifyCredentialsSuccessful";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        emit verifyCredentialsSuccessful(jsonDocument.object().toVariantMap());
-    } else {
-        emit verifyCredentialsError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleVerifyCredentialsError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleVerifyCredentialsError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit verifyCredentialsError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleAccountSettingsSuccessful()
-{
-    qDebug() << "TwitterApi::handleAccountSettingsSuccessful";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        emit accountSettingsSuccessful(jsonDocument.object().toVariantMap());
-    } else {
-        emit accountSettingsError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleAccountSettingsError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleAccountSettingsError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit accountSettingsError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleHelpConfigurationSuccessful()
-{
-    qDebug() << "TwitterApi::handleHelpConfigurationSuccessful";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        emit helpConfigurationSuccessful(jsonDocument.object().toVariantMap());
-    } else {
-        emit helpConfigurationError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleHelpConfigurationError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleHelpConfigurationError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit helpConfigurationError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleHelpPrivacySuccessful()
-{
-    qDebug() << "TwitterApi::handleHelpPrivacySuccessful";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        emit helpPrivacySuccessful(jsonDocument.object().toVariantMap());
-    } else {
-        emit helpPrivacyError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleHelpPrivacyError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleHelpPrivacyError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit helpPrivacyError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleHelpTosSuccessful()
-{
-    qDebug() << "TwitterApi::handleHelpTosSuccessful";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        emit helpTosSuccessful(jsonDocument.object().toVariantMap());
-    } else {
-        emit helpTosError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleHelpTosError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleHelpTosError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit helpTosError(parsedErrorResponse.value("message").toString());
+    qDebug() << "post tweet" << title << parameters["place_id"] << parameters["media_ids"]
+             << parameters["attachment_url"] << parameters["in_reply_to_status_id"];
+    genericRequest(API_STATUSES_UPDATE, STANDARD_REQ(TwitterApi::tweet), false, parameters);
 }
 
 void TwitterApi::tweet(const QString &text, const QString &placeId)
 {
-    qDebug() << "TwitterApi::tweet" << placeId;
-    QUrl url = QUrl(API_STATUSES_UPDATE);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("status"), text.toUtf8()));
-    if (!placeId.isEmpty()) {
-        requestParameters.append(O0RequestParameter(QByteArray("place_id"), placeId.toUtf8()));
-    }
-    QByteArray postData = O1::createQueryParameters(requestParameters);
-
-    QNetworkReply *reply = requestor->post(request, requestParameters, postData);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleTweetError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleTweetFinished()));
+    ParametersList params;
+    params["status"] = text;
+    if (!placeId.isEmpty()) params["place_id"] = placeId;
+    postTweetRequest("TwitterApi::tweet", params);
 }
 
 void TwitterApi::replyToTweet(const QString &text, const QString &replyToStatusId, const QString &placeId)
 {
-    qDebug() << "TwitterApi::replyToTweet" << replyToStatusId << placeId;
-    QUrl url = QUrl(API_STATUSES_UPDATE);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("status"), text.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("in_reply_to_status_id"), replyToStatusId.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("auto_populate_reply_metadata"), QByteArray("true")));
-    if (!placeId.isEmpty()) {
-        requestParameters.append(O0RequestParameter(QByteArray("place_id"), placeId.toUtf8()));
-    }
-    QByteArray postData = O1::createQueryParameters(requestParameters);
-
-    QNetworkReply *reply = requestor->post(request, requestParameters, postData);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleTweetError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleTweetFinished()));
+    ParametersList params;
+    params["status"] = text;
+    params["in_reply_to_status_id"] = replyToStatusId;
+    params["auto_populate_reply_metadata"] = "true";
+    if (!placeId.isEmpty()) params["place_id"] = placeId;
+    postTweetRequest("TwitterApi::replyToTweet", params);
 }
 
 void TwitterApi::retweetWithComment(const QString &text, const QString &attachmentUrl, const QString &placeId)
 {
-    qDebug() << "TwitterApi::retweetWithComment" << attachmentUrl << placeId;
-    QUrl url = QUrl(API_STATUSES_UPDATE);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("status"), text.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("attachment_url"), attachmentUrl.toUtf8()));
-    if (!placeId.isEmpty()) {
-        requestParameters.append(O0RequestParameter(QByteArray("place_id"), placeId.toUtf8()));
-    }
-    QByteArray postData = O1::createQueryParameters(requestParameters);
-
-    QNetworkReply *reply = requestor->post(request, requestParameters, postData);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleTweetError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleTweetFinished()));
+    ParametersList params;
+    params["status"] = text;
+    params["attachment_url"] = attachmentUrl;
+    if (!placeId.isEmpty()) params["place_id"] = placeId;
+    postTweetRequest("TwitterApi::retweetWithComment", params);
 }
 
 void TwitterApi::tweetWithImages(const QString &text, const QString &mediaIds, const QString &placeId)
 {
-    qDebug() << "TwitterApi::tweetWithImages" << placeId;
-    QUrl url = QUrl(API_STATUSES_UPDATE);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("status"), text.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("media_ids"), mediaIds.toUtf8()));
-    if (!placeId.isEmpty()) {
-        requestParameters.append(O0RequestParameter(QByteArray("place_id"), placeId.toUtf8()));
-    }
-    QByteArray postData = O1::createQueryParameters(requestParameters);
-
-    QNetworkReply *reply = requestor->post(request, requestParameters, postData);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleTweetError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleTweetFinished()));
+    ParametersList params;
+    params["status"] = text;
+    params["media_ids"] = mediaIds;
+    if (!placeId.isEmpty()) params["place_id"] = placeId;
+    postTweetRequest("TwitterApi::tweetWithImages", params);
 }
 
 void TwitterApi::replyToTweetWithImages(const QString &text, const QString &replyToStatusId, const QString &mediaIds, const QString &placeId)
 {
-    qDebug() << "TwitterApi::replyToTweetWithImages" << replyToStatusId << mediaIds << placeId;
-    QUrl url = QUrl(API_STATUSES_UPDATE);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("status"), text.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("in_reply_to_status_id"), replyToStatusId.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("auto_populate_reply_metadata"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("media_ids"), mediaIds.toUtf8()));
-    if (!placeId.isEmpty()) {
-        requestParameters.append(O0RequestParameter(QByteArray("place_id"), placeId.toUtf8()));
-    }
-    QByteArray postData = O1::createQueryParameters(requestParameters);
-
-    QNetworkReply *reply = requestor->post(request, requestParameters, postData);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleTweetError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleTweetFinished()));
+    ParametersList params;
+    params["status"] = text;
+    params["in_reply_to_status_id"] = replyToStatusId;
+    params["auto_populate_reply_metadata"] = "true";
+    params["media_ids"] = mediaIds;
+    if (!placeId.isEmpty()) params["place_id"] = placeId;
+    postTweetRequest("TwitterApi::replyToTweetWithImages", params);
 }
 
 void TwitterApi::homeTimeline(const QString &maxId)
 {
-    qDebug() << "TwitterApi::homeTimeline" << maxId;
-    QUrl url = QUrl(API_STATUSES_HOME_TIMELINE);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("exclude_replies", "false");
-    if (!maxId.isEmpty()) {
-        urlQuery.addQueryItem("max_id", maxId);
-    }
-    urlQuery.addQueryItem("count", "200");
-    urlQuery.addQueryItem("include_ext_alt_text", "true");
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["exclude_replies"] = "false";
+    if (!maxId.isEmpty()) params["max_id"] = maxId;
+    params["count"] = "200";
+    params["include_ext_alt_text"] = "true";
 
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("exclude_replies"), QByteArray("false")));
-    requestParameters.append(O0RequestParameter(QByteArray("count"), QByteArray("200")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_ext_alt_text"), QByteArray("true")));
-    if (!maxId.isEmpty()) {
-        requestParameters.append(O0RequestParameter(QByteArray("max_id"), maxId.toUtf8()));
-    }
-    QNetworkReply *reply = requestor->get(request, requestParameters);
+    auto finishedHandler = &TwitterApi::handleHomeTimelineFinished;
+    if (!maxId.isEmpty()) finishedHandler = &TwitterApi::handleHomeTimelineLoadMoreFinished;
 
-    if (maxId.isEmpty()) {
-        connect(reply, SIGNAL(finished()), this, SLOT(handleHomeTimelineFinished()));
-    } else {
-        connect(reply, SIGNAL(finished()), this, SLOT(handleHomeTimelineLoadMoreFinished()));
-    }
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleHomeTimelineError(QNetworkReply::NetworkError)));
-
+    genericRequest<ApiResultList>(API_STATUSES_HOME_TIMELINE, "TwitterApi::homeTimeline",
+                   nullptr, &TwitterApi::homeTimelineError,
+                   true, params, true, finishedHandler, &TwitterApi::genericHandlerFailure);
 }
 
 void TwitterApi::mentionsTimeline()
 {
-    qDebug() << "TwitterApi::mentionsTimeline";
-    QUrl url = QUrl(API_STATUSES_MENTIONS_TIMELINE);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("include_entities", "true");
-    urlQuery.addQueryItem("count", "200");
-    urlQuery.addQueryItem("include_ext_alt_text", "true");
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_entities"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("count"), QByteArray("200")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_ext_alt_text"), QByteArray("true")));
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleMentionsTimelineError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleMentionsTimelineFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["include_entities"] = "true";
+    params["count"] = "200";
+    params["include_ext_alt_text"] = "true";
+    genericRequest(API_STATUSES_MENTIONS_TIMELINE, STANDARD_REQ(TwitterApi::mentionsTimeline), true, params, true);
 }
 
 void TwitterApi::retweetTimeline()
 {
-    qDebug() << "TwitterApi::retweetTimeline";
-    QUrl url = QUrl(API_STATUSES_RETWEET_TIMELINE);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("include_entities", "true");
-    urlQuery.addQueryItem("trim_user", "false");
-    urlQuery.addQueryItem("count", "10");
-    urlQuery.addQueryItem("include_ext_alt_text", "true");
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_entities"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("trim_user"), QByteArray("false")));
-    requestParameters.append(O0RequestParameter(QByteArray("count"), QByteArray("10")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_ext_alt_text"), QByteArray("true")));
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleRetweetTimelineError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleRetweetTimelineFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["include_entities"] = "true";
+    params["trim_user"] = "false";
+    params["count"] = "10";
+    params["include_ext_alt_text"] = "true";
+    genericRequest(API_STATUSES_RETWEET_TIMELINE, STANDARD_REQ(TwitterApi::retweetTimeline), true, params, true);
 }
 
 void TwitterApi::showStatus(const QString &statusId, const bool &useSecretIdentity)
@@ -548,215 +291,88 @@ void TwitterApi::showStatus(const QString &statusId, const bool &useSecretIdenti
     // Very weird, some statusIds contain a query string. Why?
     QString sanitizedStatus = statusId;
     int qm = statusId.indexOf(QLatin1Char('?'));
-    if (qm >= 0) {
-        sanitizedStatus = statusId.left(qm);
-    }
-    qDebug() << "TwitterApi::showStatus" << sanitizedStatus;
-    QUrl url = QUrl(API_STATUSES_SHOW);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("include_entities", "true");
-    urlQuery.addQueryItem("trim_user", "false");
-    urlQuery.addQueryItem("id", sanitizedStatus);
-    urlQuery.addQueryItem("include_ext_alt_text", "true");
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
+    if (qm >= 0) sanitizedStatus = statusId.left(qm);
 
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_entities"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("trim_user"), QByteArray("false")));
-    requestParameters.append(O0RequestParameter(QByteArray("id"), sanitizedStatus.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("include_ext_alt_text"), QByteArray("true")));
-
-    QNetworkReply *reply;
-    if (useSecretIdentity && secretIdentityRequestor != nullptr) {
-        request.setRawHeader(HEADER_NO_RECURSION, "X");
-        reply = secretIdentityRequestor->get(request, requestParameters);
-    } else {
-        reply = requestor->get(request, requestParameters);
-    }
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleShowStatusError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleShowStatusFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["include_entities"] = "true";
+    params["trim_user"] = "false";
+    params["id"] = sanitizedStatus;
+    params["include_ext_alt_text"] = "true";
+    genericRequest(API_STATUSES_SHOW, STANDARD_REQ(TwitterApi::showStatus), true, params, true,
+                   &TwitterApi::genericHandlerFinished, &TwitterApi::handleShowStatusError, useSecretIdentity);
 }
 
 void TwitterApi::showUser(const QString &screenName)
 {
-    qDebug() << "TwitterApi::showUser" << screenName;
-    QUrl url = QUrl(API_USERS_SHOW);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("include_entities", "true");
-    urlQuery.addQueryItem("screen_name", screenName);
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_entities"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("screen_name"), screenName.toUtf8()));
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleShowUserError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleShowUserFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["include_entities"] = "true";
+    params["screen_name"] = screenName;
+    genericRequest(API_USERS_SHOW, STANDARD_REQ(TwitterApi::showUser), true, params, true);
 }
 
 void TwitterApi::showUserById(const QString &userId)
 {
-    qDebug() << "TwitterApi::showUserById" << userId;
-    QUrl url = QUrl(API_USERS_SHOW);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("include_entities", "true");
-    urlQuery.addQueryItem("user_id", userId);
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_entities"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("user_id"), userId.toUtf8()));
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleShowUserError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleShowUserFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["include_entities"] = "true";
+    params["user_id"] = userId;
+    genericRequest(API_USERS_SHOW, "TwitterApi::showUserById", &TwitterApi::showUserSuccessful,
+                   &TwitterApi::showUserError, true, params, true);
 }
 
 void TwitterApi::userTimeline(const QString &screenName, const bool &useSecretIdentity)
 {
-    qDebug() << "TwitterApi::userTimeline" << screenName;
-    QUrl url = QUrl(API_STATUSES_USER_TIMELINE);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("count", "200");
-    urlQuery.addQueryItem("include_rts", "true");
-    urlQuery.addQueryItem("exclude_replies", "false");
-    urlQuery.addQueryItem("screen_name", screenName);
-    urlQuery.addQueryItem("include_ext_alt_text", "true");
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("count"), QByteArray("200")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_rts"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("exclude_replies"), QByteArray("false")));
-    requestParameters.append(O0RequestParameter(QByteArray("screen_name"), screenName.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("include_ext_alt_text"), QByteArray("true")));
-
-    QNetworkReply *reply;
-    if (useSecretIdentity && secretIdentityRequestor != nullptr) {
-        request.setRawHeader(HEADER_NO_RECURSION, "X");
-        reply = secretIdentityRequestor->get(request, requestParameters);
-    } else {
-        reply = requestor->get(request, requestParameters);
-    }
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleUserTimelineError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleUserTimelineFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["count"] = "200";
+    params["include_rts"] = "true";
+    params["exclude_replies"] = "false";
+    params["screen_name"] = screenName;
+    params["include_ext_alt_text"] = "true";
+    genericRequest(API_STATUSES_USER_TIMELINE, STANDARD_REQ(TwitterApi::userTimeline), true, params, true,
+                   &TwitterApi::genericHandlerFinished, &TwitterApi::handleUserTimelineError,
+                   useSecretIdentity);
 }
 
 void TwitterApi::followers(const QString &screenName)
 {
-    qDebug() << "TwitterApi::followers" << screenName;
-    QUrl url = QUrl(API_FOLLOWERS_LIST);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("screen_name", screenName);
-    urlQuery.addQueryItem("count", "200");
-    urlQuery.addQueryItem("skip_status", "true");
-    urlQuery.addQueryItem("include_user_entities", "true");
-
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("screen_name"), screenName.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("count"), QByteArray("200")));
-    requestParameters.append(O0RequestParameter(QByteArray("skip_status"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_user_entities"), QByteArray("true")));
-
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleFollowersError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleFollowersFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["screen_name"] = screenName;
+    params["count"] = "200";
+    params["skip_status"] = "true";
+    params["include_user_entities"] = "true";
+    genericRequest(API_FOLLOWERS_LIST, STANDARD_REQ(TwitterApi::followers), true, params, true);
 }
 
 void TwitterApi::friends(const QString &screenName, const QString &cursor)
 {
-    qDebug() << "TwitterApi::friends" << screenName;
-    QUrl url = QUrl(API_FRIENDS_LIST);
-    QUrlQuery urlQuery = QUrlQuery();
-    urlQuery.addQueryItem("tweet_mode", "extended");
-    urlQuery.addQueryItem("screen_name", screenName);
-    urlQuery.addQueryItem("count", "200");
-    urlQuery.addQueryItem("skip_status", "true");
-    urlQuery.addQueryItem("include_user_entities", "true");
-    if (cursor != "") {
-        urlQuery.addQueryItem("cursor", cursor);
-    }
-
-    url.setQuery(urlQuery);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("screen_name"), screenName.toUtf8()));
-    requestParameters.append(O0RequestParameter(QByteArray("count"), QByteArray("200")));
-    requestParameters.append(O0RequestParameter(QByteArray("skip_status"), QByteArray("true")));
-    requestParameters.append(O0RequestParameter(QByteArray("include_user_entities"), QByteArray("true")));
-    if (cursor != "") {
-        requestParameters.append(O0RequestParameter(QByteArray("cursor"), cursor.toUtf8()));
-    }
-
-    QNetworkReply *reply = requestor->get(request, requestParameters);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleFriendsError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleFriendsFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["screen_name"] = screenName;
+    params["count"] = "200";
+    params["skip_status"] = "true";
+    params["include_user_entities"] = "true";
+    genericRequest(API_FRIENDS_LIST, STANDARD_REQ(TwitterApi::friends), true, params, true);
 }
 
 void TwitterApi::followUser(const QString &screenName)
 {
-    qDebug() << "TwitterApi::followUser" << screenName;
-    QUrl url = QUrl(API_FRIENDSHIPS_CREATE);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("screen_name"), screenName.toUtf8()));
-    QByteArray postData = O1::createQueryParameters(requestParameters);
-
-    QNetworkReply *reply = requestor->post(request, requestParameters, postData);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleFollowUserError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleFollowUserFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["screen_name"] = screenName;
+    genericRequest(API_FRIENDSHIPS_CREATE, STANDARD_REQ(TwitterApi::followUser), false, params, false,
+                   &TwitterApi::handleFollowUserFinished, &TwitterApi::genericHandlerFailure);
 }
 
 void TwitterApi::unfollowUser(const QString &screenName)
 {
-    qDebug() << "TwitterApi::unfollowUser" << screenName;
-    QUrl url = QUrl(API_FRIENDSHIPS_DESTROY);
-    QNetworkRequest request(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
-
-    QList<O0RequestParameter> requestParameters = QList<O0RequestParameter>();
-    requestParameters.append(O0RequestParameter(QByteArray("tweet_mode"), QByteArray("extended")));
-    requestParameters.append(O0RequestParameter(QByteArray("screen_name"), screenName.toUtf8()));
-    QByteArray postData = O1::createQueryParameters(requestParameters);
-
-    QNetworkReply *reply = requestor->post(request, requestParameters, postData);
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleUnfollowUserError(QNetworkReply::NetworkError)));
-    connect(reply, SIGNAL(finished()), this, SLOT(handleUnfollowUserFinished()));
+    ParametersList params;
+    params["tweet_mode"] = "extended";
+    params["screen_name"] = screenName;
+    genericRequest(API_FRIENDSHIPS_DESTROY, STANDARD_REQ(TwitterApi::unfollowUser), false, params, true);
 }
 
 void TwitterApi::searchTweets(const QString &query)
@@ -1390,132 +1006,37 @@ QVariantMap TwitterApi::parseErrorResponse(const QString &errorText, const QByte
     return errorResponse;
 }
 
-void TwitterApi::handleTweetError(QNetworkReply::NetworkError error)
+void TwitterApi::_handleHomeTimelineFinishedHelper(const QString& title, QNetworkReply *reply, bool incrementalUpdate)
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleTweetError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit tweetError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleTweetFinished()
-{
-    qDebug() << "TwitterApi::handleTweetFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    qDebug() << QString("finished %1").arg(incrementalUpdate ? "incremental" : "non-incremental") << title;
     reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        QJsonObject responseObject = jsonDocument.object();
-        emit tweetSuccessful(responseObject.toVariantMap());
-    } else {
-        emit tweetError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleHomeTimelineError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleHomeTimelineError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit homeTimelineError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleHomeTimelineFinished()
-{
-    qDebug() << "TwitterApi::handleHomeTimelineFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
+    if (reply->error() != QNetworkReply::NoError) return;
 
     QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
     if (jsonDocument.isArray()) {
         QJsonArray responseArray = jsonDocument.array();
-        emit homeTimelineSuccessful(responseArray.toVariantList(), false);
+        emit homeTimelineSuccessful(responseArray.toVariantList(), incrementalUpdate);
     } else {
-        emit homeTimelineError("Piepmatz couldn't understand Twitter's response!");
+        emit homeTimelineError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
-void TwitterApi::handleHomeTimelineLoadMoreFinished()
+void TwitterApi::handleHomeTimelineFinished(const QString &title, QNetworkReply *reply, ApiResultList successSignal, ApiResultError errorSignal)
 {
-    qDebug() << "TwitterApi::handleHomeTimelineLoadMoreFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isArray()) {
-        QJsonArray responseArray = jsonDocument.array();
-        emit homeTimelineSuccessful(responseArray.toVariantList(), true);
-    } else {
-        emit homeTimelineError("Piepmatz couldn't understand Twitter's response!");
-    }
+    Q_UNUSED(successSignal); Q_UNUSED(errorSignal);
+    _handleHomeTimelineFinishedHelper(title, reply, false);
 }
 
-void TwitterApi::handleMentionsTimelineError(QNetworkReply::NetworkError error)
+void TwitterApi::handleHomeTimelineLoadMoreFinished(const QString &title, QNetworkReply *reply, TwitterApi::ApiResultList successSignal, ApiResultError errorSignal)
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleMentionsTimelineError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit mentionsTimelineError(parsedErrorResponse.value("message").toString());
+    Q_UNUSED(successSignal); Q_UNUSED(errorSignal);
+    _handleHomeTimelineFinishedHelper(title, reply, true);
 }
 
-void TwitterApi::handleMentionsTimelineFinished()
+void TwitterApi::handleUserTimelineError(const QString &title, QNetworkReply *reply, QNetworkReply::NetworkError errorCode, ApiResultError errorSignal)
 {
-    qDebug() << "TwitterApi::handleMentionsTimelineFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isArray()) {
-        QJsonArray responseArray = jsonDocument.array();
-        emit mentionsTimelineSuccessful(responseArray.toVariantList());
-    } else {
-        emit mentionsTimelineError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleRetweetTimelineError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleRetweetTimelineError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit mentionsTimelineError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleRetweetTimelineFinished()
-{
-    qDebug() << "TwitterApi::handleRetweetTimelineFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isArray()) {
-        QJsonArray responseArray = jsonDocument.array();
-        emit retweetTimelineSuccessful(responseArray.toVariantList());
-    } else {
-        emit retweetTimelineError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleUserTimelineError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleUserTimelineError:" << (int)error << reply->errorString();
+    Q_UNUSED(title); Q_UNUSED(errorSignal);
+    qWarning() << "TwitterApi::handleUserTimelineError:" << (int)errorCode << reply->errorString();
     QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
     QUrlQuery urlQuery(reply->request().url());
     if (reply->request().hasRawHeader(HEADER_NO_RECURSION)) {
@@ -1532,80 +1053,10 @@ void TwitterApi::handleUserTimelineError(QNetworkReply::NetworkError error)
     }
 }
 
-void TwitterApi::handleUserTimelineFinished()
+void TwitterApi::handleShowStatusError(const QString &title, QNetworkReply *reply, QNetworkReply::NetworkError errorCode, ApiResultError errorSignal)
 {
-    qDebug() << "TwitterApi::handleUserTimelineFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isArray()) {
-        QJsonArray responseArray = jsonDocument.array();
-        emit userTimelineSuccessful(responseArray.toVariantList());
-    } else {
-        emit userTimelineError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleFollowersError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleFollowersError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit followersError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleFollowersFinished()
-{
-    qDebug() << "TwitterApi::handleFollowersFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        QJsonObject responseObject = jsonDocument.object();
-        emit followersSuccessful(responseObject.toVariantMap());
-    } else {
-        emit followersError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleFriendsError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleFriendsError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit friendsError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleFriendsFinished()
-{
-    qDebug() << "TwitterApi::handleFriendsFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        QJsonObject responseObject = jsonDocument.object();
-        emit friendsSuccessful(responseObject.toVariantMap());
-    } else {
-        emit friendsError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleShowStatusError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleShowStatusError:" << (int)error << reply->errorString();
+    Q_UNUSED(title); Q_UNUSED(errorSignal);
+    qWarning() << "TwitterApi::handleShowStatusError:" << (int)errorCode << reply->errorString();
     QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
     qDebug() << "Tweet couldn't be loaded for URL " << reply->request().url().toString() << ", errors: " << parsedErrorResponse;
     // emit showStatusError(parsedErrorResponse.value("message").toString());
@@ -1648,63 +1099,6 @@ void TwitterApi::handleShowStatusError(QNetworkReply::NetworkError error)
     }
 }
 
-void TwitterApi::handleShowStatusFinished()
-{
-    qDebug() << "TwitterApi::handleShowStatusFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    if (reply->request().hasRawHeader(HEADER_NO_RECURSION)) {
-        qDebug() << "Probably a secret identity response...";
-    } else {
-        qDebug() << "Standard response...";
-    }
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        QJsonObject responseObject = jsonDocument.object();
-        emit showStatusSuccessful(responseObject.toVariantMap());
-    } else {
-        emit showStatusError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleShowUserError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleShowUserError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit showUserError(parsedErrorResponse.value("message").toString());
-}
-
-void TwitterApi::handleShowUserFinished()
-{
-    qDebug() << "TwitterApi::handleShowUserFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
-
-    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
-    if (jsonDocument.isObject()) {
-        QJsonObject responseObject = jsonDocument.object();
-        emit showUserSuccessful(responseObject.toVariantMap());
-    } else {
-        emit showUserError("Piepmatz couldn't understand Twitter's response!");
-    }
-}
-
-void TwitterApi::handleFollowUserError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleFollowUserError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit followUserError(parsedErrorResponse.value("message").toString());
-}
-
 void TwitterApi::handleFollowUserFinished()
 {
     qDebug() << "TwitterApi::handleFollowUserFinished";
@@ -1724,14 +1118,6 @@ void TwitterApi::handleFollowUserFinished()
     } else {
         emit followUserError(DEFAULT_ERROR_MESSAGE);
     }
-}
-
-void TwitterApi::handleUnfollowUserError(QNetworkReply::NetworkError error)
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "TwitterApi::handleUnfollowUserError:" << (int)error << reply->errorString();
-    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
-    emit unfollowUserError(parsedErrorResponse.value("message").toString());
 }
 
 void TwitterApi::handleUnfollowUserFinished()

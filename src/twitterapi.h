@@ -266,6 +266,8 @@ private:
     QNetworkReply* runRawRequest(const QString& apiCall, bool isGetRequest, const ParametersList& parameters,
                                  bool includeQueryParameters, bool useSecretIdentity);
 
+    void postTweetRequest(const QString& title, ParametersList parameters);
+
 private slots:
 #define FINISHED_ARGS(success_t) const QString& title, QNetworkReply *reply, success_t successSignal, ApiResultError errorSignal
 #define FAILURE_ARGS const QString& title, QNetworkReply *reply, QNetworkReply::NetworkError errorCode, ApiResultError errorSignal
@@ -274,37 +276,14 @@ private slots:
     void genericHandlerFinished(FINISHED_ARGS(ApiResultList));
     void genericHandlerFailure(FAILURE_ARGS);
 
-    void handleAccountSettingsSuccessful();
-    void handleAccountSettingsError(QNetworkReply::NetworkError error);
-    void handleHelpConfigurationSuccessful();
-    void handleHelpConfigurationError(QNetworkReply::NetworkError error);
-    void handleHelpPrivacySuccessful();
-    void handleHelpPrivacyError(QNetworkReply::NetworkError error);
-    void handleHelpTosSuccessful();
-    void handleHelpTosError(QNetworkReply::NetworkError error);
-    void handleTweetError(QNetworkReply::NetworkError error);
-    void handleTweetFinished();
-    void handleHomeTimelineError(QNetworkReply::NetworkError error);
-    void handleHomeTimelineFinished();
-    void handleHomeTimelineLoadMoreFinished();
-    void handleMentionsTimelineError(QNetworkReply::NetworkError error);
-    void handleMentionsTimelineFinished();
-    void handleRetweetTimelineError(QNetworkReply::NetworkError error);
-    void handleRetweetTimelineFinished();
-    void handleUserTimelineError(QNetworkReply::NetworkError error);
-    void handleUserTimelineFinished();
-    void handleFollowersError(QNetworkReply::NetworkError error);
-    void handleFollowersFinished();
-    void handleFriendsError(QNetworkReply::NetworkError error);
-    void handleFriendsFinished();
-    void handleShowStatusError(QNetworkReply::NetworkError error);
-    void handleShowStatusFinished();
-    void handleShowUserError(QNetworkReply::NetworkError error);
-    void handleShowUserFinished();
-    void handleFollowUserError(QNetworkReply::NetworkError error);
+    void _handleHomeTimelineFinishedHelper(const QString& title, QNetworkReply *reply, bool incrementalUpdate);
+    void handleHomeTimelineFinished(FINISHED_ARGS(ApiResultList));
+    void handleHomeTimelineLoadMoreFinished(FINISHED_ARGS(ApiResultList));
+    void handleShowStatusError(FAILURE_ARGS);
+    void handleUserTimelineError(FAILURE_ARGS);
     void handleFollowUserFinished();
-    void handleUnfollowUserError(QNetworkReply::NetworkError error);
     void handleUnfollowUserFinished();
+
     void handleSearchTweetsError(QNetworkReply::NetworkError error);
     void handleSearchTweetsFinished();
     void handleSearchUsersError(QNetworkReply::NetworkError error);
