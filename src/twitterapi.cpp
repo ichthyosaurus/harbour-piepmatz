@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2017-19 Sebastian J. Wolf
+                  2020 Mirian Margiani
 
     This file is part of Piepmatz.
 
@@ -25,6 +26,7 @@
 #include "contentextractor.h"
 #include "QGumboParser/qgumbodocument.h"
 #include "QGumboParser/qgumbonode.h"
+//#include <QOverload> // only available since Qt 5.7
 #include <QBuffer>
 #include <QFile>
 #include <QHttpMultiPart>
@@ -35,12 +37,132 @@
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusInterface>
 
+// This macro takes the callers name (as: TwitterApi::helpPrivacy) and converts
+// it to three arguments for TwitterApi::genericRequest: title, successSignal, errorSignal
+// Example: STANDARD_REQ(TwitterApi::helpPrivacy) expands to
+// QString("TwitterApi::helpPrivacy"), TwitterApi::helpPrivacySuccessful, TwitterApi::helpPrivacyError
+// This helps in code reduction and is to avoid typo-bugs.
+#ifndef STANDARD_REQ
+#define STANDARD_REQ(name) QString((#name)), &name##Successful, &name##Error
+#endif
+
 //TwitterApi::TwitterApi(O1Requestor* requestor, QNetworkAccessManager *manager, Wagnis *wagnis, QObject* parent) : QObject(parent) {
 TwitterApi::TwitterApi(O1Requestor* requestor, QNetworkAccessManager *manager, O1Requestor *secretIdentityRequestor, QObject* parent) : QObject(parent) {
     this->requestor = requestor;
     this->manager = manager;
     this->secretIdentityRequestor = secretIdentityRequestor;
     //this->wagnis = wagnis;
+}
+
+template<typename SIG_SUCCESS_T, typename SIG_FAILURE_T>
+QNetworkReply *TwitterApi::genericRequest(const QString &apiCall, const QString &title,
+                                          SIG_SUCCESS_T successSignal, SIG_FAILURE_T errorSignal,
+                                          bool isGetRequest, TwitterApi::ParametersList parameters, bool includeQueryParameters,
+                                          ApiFinishedHandler<SIG_SUCCESS_T, SIG_FAILURE_T> finishedHandler,
+                                          ApiFailureHandler<SIG_FAILURE_T> errorHandler,
+                                          bool useSecretIdentity)
+{
+    qDebug() << QString("generic request (%1):").arg(isGetRequest ? "get" : "post") << title << parameters;
+    QNetworkReply *reply = runRawRequest(apiCall, isGetRequest, parameters, includeQueryParameters, useSecretIdentity);
+
+    if (errorHandler != nullptr) {
+        // QNetworkReply::error is a signal has an overloaded method. Before Qt 5.7,
+        // we have to manually select which one to use as below. Starting with Qt 5.7,
+        // there is 'QOverload<void>::of(...)' to help with that.
+        connect(reply, static_cast<void(QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+                this, [=](const QNetworkReply::NetworkError& error) {
+            (this->*errorHandler)(title, reply, error, errorSignal);
+        });
+    }
+
+    if (finishedHandler != nullptr) {
+        connect(reply, &QNetworkReply::finished, this, [=]() {
+            (this->*finishedHandler)(title, reply, successSignal, errorSignal);
+        });
+    }
+
+    return reply;
+}
+
+QNetworkReply *TwitterApi::runRawRequest(const QString &apiCall, bool isGetRequest,
+                                         const TwitterApi::ParametersList &parameters, bool includeQueryParameters,
+                                         bool useSecretIdentity)
+{
+    QUrl url = QUrl(apiCall);
+
+    if (includeQueryParameters) {
+        QUrlQuery urlQuery = QUrlQuery();
+        for (QString key : parameters.keys()) {
+            urlQuery.addQueryItem(key, QString(QUrl::toPercentEncoding(parameters[key])));
+        }
+        url.setQuery(urlQuery);
+    }
+
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
+
+    QList<O0RequestParameter> preparedParameters;
+    for (QString key : parameters.keys()) {
+        preparedParameters.append(O0RequestParameter(key.toUtf8(), parameters[key].toUtf8()));
+    }
+
+    O1Requestor* usedRequestor = requestor;
+    if (useSecretIdentity && secretIdentityRequestor != nullptr) {
+        usedRequestor = secretIdentityRequestor;
+    }
+
+    QNetworkReply *reply;
+    if (isGetRequest) {
+        reply = usedRequestor->get(request, preparedParameters);
+    } else {
+        QByteArray postData = O1::createQueryParameters(preparedParameters);
+        reply = usedRequestor->post(request, preparedParameters, postData);
+    }
+
+    return reply;
+}
+
+void TwitterApi::genericHandlerFinished(const QString &title, QNetworkReply *reply,
+                                        ApiResultMap successSignal, ApiResultError errorSignal)
+{
+    qDebug() << "generic finished (map):" << title <<
+                QString(reply->request().hasRawHeader(HEADER_NO_RECURSION) ?
+                    "(probably a secret identity response)" : "(standard response)");
+    reply->deleteLater();
+    if (reply->error() != QNetworkReply::NoError) return;
+
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
+    if (jsonDocument.isObject()) {
+        emit (this->*successSignal)(jsonDocument.object().toVariantMap());
+    } else {
+        emit (this->*errorSignal)(DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+void TwitterApi::genericHandlerFinished(const QString &title, QNetworkReply *reply,
+                                        ApiResultList successSignal, ApiResultError errorSignal)
+{
+    qDebug() << "generic finished (list):" << title <<
+                QString(reply->request().hasRawHeader(HEADER_NO_RECURSION) ?
+                    "(probably a secret identity response)" : "(standard response)");
+    reply->deleteLater();
+    if (reply->error() != QNetworkReply::NoError) return;
+
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
+    if (jsonDocument.isArray()) {
+        emit (this->*successSignal)(jsonDocument.array().toVariantList());
+    } else {
+        emit (this->*errorSignal)(DEFAULT_ERROR_MESSAGE);
+    }
+}
+
+void TwitterApi::genericHandlerFailure(const QString& title, QNetworkReply* reply,
+                                       QNetworkReply::NetworkError errorCode,
+                                       TwitterApi::ApiResultError errorSignal)
+{
+    qWarning() << "generic failure:" << title << (int)errorCode << reply->errorString();
+    QVariantMap parsedErrorResponse = parseErrorResponse(reply->errorString(), reply->readAll());
+    emit (this->*errorSignal)(parsedErrorResponse.value("message").toString());
 }
 
 void TwitterApi::verifyCredentials()

@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2017-19 Sebastian J. Wolf
+                  2020 Mirian Margiani
 
     This file is part of Piepmatz.
 
@@ -77,6 +78,8 @@ const char API_SAVED_SEARCHES_CREATE[] = "https://api.twitter.com/1.1/saved_sear
 const char API_SAVED_SEARCHES_DESTROY[] = "https://api.twitter.com/1.1/saved_searches/destroy/:id.json";
 
 const char HEADER_NO_RECURSION[] = "X-Piepmatz-No-Recursion";
+
+const char DEFAULT_ERROR_MESSAGE[] = "Piepmatz couldn't understand Twitter's response!";
 
 class TwitterApi : public QObject {
 
@@ -235,7 +238,42 @@ private:
     QNetworkAccessManager *manager;
     //Wagnis *wagnis;
 
+    // Pointers to member functions so we can pass methods directly
+    // as arguments to the generic request function;
+    // see for details:
+    // - https://en.cppreference.com/w/cpp/language/pointer#Pointers_to_data_members
+    // - https://stackoverflow.com/a/44792058
+    using ParametersList = QMap<QString, QString>;
+    using ApiResultMap = void (TwitterApi::*)(const QVariantMap&); // success signal
+    using ApiResultList = void (TwitterApi::*)(const QVariantList&); // success signal
+    using ApiResultError = void (TwitterApi::*)(const QString&); // default error signal
+
+    template<typename SIG_SUCCESS_T, typename SIG_FAILURE_T = ApiResultError>
+    using ApiFinishedHandler = void (TwitterApi::*)(const QString&, QNetworkReply*, SIG_SUCCESS_T, SIG_FAILURE_T);
+
+    template<typename SIG_FAILURE_T = ApiResultError>
+    using ApiFailureHandler = void (TwitterApi::*)(const QString&, QNetworkReply*, QNetworkReply::NetworkError, SIG_FAILURE_T);
+
+    template<typename SIG_SUCCESS_T, typename SIG_FAILURE_T = ApiResultError>
+    QNetworkReply* genericRequest(const QString& apiCall, const QString& title,
+                                  SIG_SUCCESS_T successSignal, SIG_FAILURE_T errorSignal,
+                                  bool isGetRequest = true,
+                                  ParametersList parameters = ParametersList(),
+                                  bool includeQueryParameters = false,
+                                  ApiFinishedHandler<SIG_SUCCESS_T, SIG_FAILURE_T> finishedHandler = &TwitterApi::genericHandlerFinished,
+                                  ApiFailureHandler<SIG_FAILURE_T> errorHandler = &TwitterApi::genericHandlerFailure,
+                                  bool useSecretIdentity = false);
+    QNetworkReply* runRawRequest(const QString& apiCall, bool isGetRequest, const ParametersList& parameters,
+                                 bool includeQueryParameters, bool useSecretIdentity);
+
 private slots:
+#define FINISHED_ARGS(success_t) const QString& title, QNetworkReply *reply, success_t successSignal, ApiResultError errorSignal
+#define FAILURE_ARGS const QString& title, QNetworkReply *reply, QNetworkReply::NetworkError errorCode, ApiResultError errorSignal
+
+    void genericHandlerFinished(FINISHED_ARGS(ApiResultMap));
+    void genericHandlerFinished(FINISHED_ARGS(ApiResultList));
+    void genericHandlerFailure(FAILURE_ARGS);
+
     void handleVerifyCredentialsSuccessful();
     void handleVerifyCredentialsError(QNetworkReply::NetworkError error);
     void handleAccountSettingsSuccessful();
