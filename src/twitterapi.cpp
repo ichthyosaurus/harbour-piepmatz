@@ -1732,7 +1732,7 @@ void TwitterApi::handleFollowUserFinished()
         responseObject.insert("following", QJsonValue(true));
         emit followUserSuccessful(responseObject.toVariantMap());
     } else {
-        emit followUserError("Piepmatz couldn't understand Twitter's response!");
+        emit followUserError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1761,7 +1761,7 @@ void TwitterApi::handleUnfollowUserFinished()
         responseObject.insert("following", QJsonValue(false));
         emit unfollowUserSuccessful(responseObject.toVariantMap());
     } else {
-        emit unfollowUserError("Piepmatz couldn't understand Twitter's response!");
+        emit unfollowUserError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1804,7 +1804,7 @@ void TwitterApi::handleSearchTweetsFinished()
         }
         emit searchTweetsSuccessful(resultsArray.toVariantList());
     } else {
-        emit searchTweetsError("Piepmatz couldn't understand Twitter's response!");
+        emit searchTweetsError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1830,7 +1830,7 @@ void TwitterApi::handleSearchUsersFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit searchUsersSuccessful(responseArray.toVariantList());
     } else {
-        emit searchUsersError("Piepmatz couldn't understand Twitter's response!");
+        emit searchUsersError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1856,7 +1856,7 @@ void TwitterApi::handleSearchGeoFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit searchGeoSuccessful(responseObject.toVariantMap());
     } else {
-        emit searchGeoError("Piepmatz couldn't understand Twitter's response!");
+        emit searchGeoError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1882,7 +1882,7 @@ void TwitterApi::handleFavoriteFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit favoriteSuccessful(responseObject.toVariantMap());
     } else {
-        emit favoriteError("Piepmatz couldn't understand Twitter's response!");
+        emit favoriteError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1908,7 +1908,7 @@ void TwitterApi::handleUnfavoriteFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit unfavoriteSuccessful(responseObject.toVariantMap());
     } else {
-        emit unfavoriteError("Piepmatz couldn't understand Twitter's response!");
+        emit unfavoriteError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1934,7 +1934,7 @@ void TwitterApi::handleFavoritesFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit favoritesSuccessful(responseArray.toVariantList());
     } else {
-        emit favoritesError("Piepmatz couldn't understand Twitter's response!");
+        emit favoritesError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1960,7 +1960,7 @@ void TwitterApi::handleRetweetFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit retweetSuccessful(responseObject.toVariantMap());
     } else {
-        emit retweetError("Piepmatz couldn't understand Twitter's response!");
+        emit retweetError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -1997,7 +1997,7 @@ void TwitterApi::handleRetweetsForFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit retweetsForSuccessful(statusId, responseArray.toVariantList());
     } else {
-        emit retweetsForError(statusId, "Piepmatz couldn't understand Twitter's response!");
+        emit retweetsForError(statusId, DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2023,7 +2023,7 @@ void TwitterApi::handleUnretweetFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit unretweetSuccessful(responseObject.toVariantMap());
     } else {
-        emit unretweetError("Piepmatz couldn't understand Twitter's response!");
+        emit unretweetError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2049,7 +2049,7 @@ void TwitterApi::handleDestroyFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit destroySuccessful(responseObject.toVariantMap());
     } else {
-        emit destroyError("Piepmatz couldn't understand Twitter's response!");
+        emit destroyError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2075,7 +2075,7 @@ void TwitterApi::handleDirectMessagesListFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit directMessagesListSuccessful(responseObject.toVariantMap());
     } else {
-        emit directMessagesListError("Piepmatz couldn't understand Twitter's response!");
+        emit directMessagesListError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2101,7 +2101,7 @@ void TwitterApi::handleDirectMessagesNewFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit directMessagesNewSuccessful(responseObject.toVariantMap());
     } else {
-        emit directMessagesNewError("Piepmatz couldn't understand Twitter's response!");
+        emit directMessagesNewError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2127,7 +2127,7 @@ void TwitterApi::handleTrendsFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit trendsSuccessful(responseArray.toVariantList());
     } else {
-        emit trendsError("Piepmatz couldn't understand Twitter's response!");
+        emit trendsError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2153,7 +2153,7 @@ void TwitterApi::handlePlacesForTrendsFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit placesForTrendsSuccessful(responseArray.toVariantList());
     } else {
-        emit placesForTrendsError("Piepmatz couldn't understand Twitter's response!");
+        emit placesForTrendsError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2179,7 +2179,7 @@ void TwitterApi::handleUserListsFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit userListsSuccessful(responseArray.toVariantList());
     } else {
-        emit userListsError("Piepmatz couldn't understand Twitter's response!");
+        emit userListsError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2205,7 +2205,7 @@ void TwitterApi::handleListsMembershipsFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit listsMembershipsSuccessful(responseObject.toVariantMap());
     } else {
-        emit listsMembershipsError("Piepmatz couldn't understand Twitter's response!");
+        emit listsMembershipsError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2231,7 +2231,7 @@ void TwitterApi::handleListMembersFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit listMembersSuccessful(responseObject.toVariantMap());
     } else {
-        emit listMembersError("Piepmatz couldn't understand Twitter's response!");
+        emit listMembersError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2257,7 +2257,7 @@ void TwitterApi::handleListTimelineFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit listTimelineSuccessful(responseArray.toVariantList(), false);
     } else {
-        emit listTimelineError("Piepmatz couldn't understand Twitter's response!");
+        emit listTimelineError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2275,7 +2275,7 @@ void TwitterApi::handleListTimelineLoadMoreFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit listTimelineSuccessful(responseArray.toVariantList(), true);
     } else {
-        emit listTimelineError("Piepmatz couldn't understand Twitter's response!");
+        emit listTimelineError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2301,7 +2301,7 @@ void TwitterApi::handleSavedSearchesFinished()
         QJsonArray responseArray = jsonDocument.array();
         emit savedSearchesSuccessful(responseArray.toVariantList());
     } else {
-        emit savedSearchesError("Piepmatz couldn't understand Twitter's response!");
+        emit savedSearchesError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2327,7 +2327,7 @@ void TwitterApi::handleSaveSearchFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit saveSearchSuccessful(responseObject.toVariantMap());
     } else {
-        emit saveSearchError("Piepmatz couldn't understand Twitter's response!");
+        emit saveSearchError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2353,7 +2353,7 @@ void TwitterApi::handleDestroySavedSearchFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit destroySavedSearchSuccessful(responseObject.toVariantMap());
     } else {
-        emit destroySavedSearchError("Piepmatz couldn't understand Twitter's response!");
+        emit destroySavedSearchError(DEFAULT_ERROR_MESSAGE);
     }
 }
 
@@ -2530,6 +2530,6 @@ void TwitterApi::handleGetIpInfoFinished()
         QJsonObject responseObject = jsonDocument.object();
         emit getIpInfoSuccessful(responseObject.toVariantMap());
     } else {
-        emit getIpInfoError("Piepmatz couldn't understand Twitter's response!");
+        emit getIpInfoError(DEFAULT_ERROR_MESSAGE);
     }
 }
