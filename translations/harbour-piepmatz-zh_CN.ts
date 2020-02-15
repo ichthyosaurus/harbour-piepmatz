@@ -248,7 +248,7 @@
     <name>MessagesButton</name>
     <message>
         <source>Messages</source>
-        <translation>消息</translation>
+        <translation>私信</translation>
     </message>
 </context>
 <context>
@@ -393,7 +393,7 @@
     </message>
     <message>
         <source>New Messages</source>
-        <translation>新消息</translation>
+        <translation>新私信</translation>
     </message>
     <message>
         <source>You have new direct messages!</source>
@@ -401,7 +401,7 @@
     </message>
     <message>
         <source>You have new messages!</source>
-        <translation>你有新消息!</translation>
+        <translation>你有新私信!</translation>
     </message>
     <message>
         <source>Load more tweets</source>
@@ -413,7 +413,7 @@
     </message>
     <message>
         <source>Trends for %1</source>
-        <translation>% 1 趋势</translation>
+        <translation>%1 趋势</translation>
     </message>
     <message>
         <source>You have been mentioned %1 times!</source>
@@ -477,7 +477,7 @@
     </message>
     <message>
         <source>Search query &apos;%1&apos; saved successfully</source>
-        <translation>已成功搜索及保存  &apos;%1&apos;</translation>
+        <translation>已成功搜索及保存 &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Deleting</source>
@@ -492,7 +492,7 @@
     <name>Profile</name>
     <message>
         <source>%1 Following</source>
-        <translation>%1 正在关注</translation>
+        <translation>%1 位正在关注</translation>
     </message>
     <message>
         <source>%1 Followers</source>
@@ -500,7 +500,7 @@
     </message>
     <message>
         <source>%1 Tweets</source>
-        <translation>%1 推文</translation>
+        <translation>%1 条推文</translation>
     </message>
     <message>
         <source>Joined in %1</source>
@@ -870,19 +870,27 @@
     </message>
     <message>
         <source>Use Secret Identity</source>
-        <translation type="unfinished"></translation>
+        <translation>使用加密身份</translation>
     </message>
     <message>
         <source>Secret Identity</source>
-        <translation type="unfinished"></translation>
+        <translation>加密身份</translation>
     </message>
     <message>
         <source>Choose the secret identity here</source>
-        <translation type="unfinished"></translation>
+        <translation>在此选择加密身份</translation>
     </message>
     <message>
         <source>Use secret identity to display blocked Twitter content. Please restart Piepmatz to apply changes.</source>
-        <translation type="unfinished"></translation>
+        <translation>使用加密身份以显示被封锁的推文。请重启 Piepmatz 以生效。</translation>
+    </message>
+    <message>
+        <source>Integrate Piepmatz into open-with menu of Sailfish OS</source>
+        <translation>整合 Piepmatz 到旗鱼系统打开方式菜单</translation>
+    </message>
+    <message>
+        <source>Open-with menu integration</source>
+        <translation>打开方式菜单整合</translation>
     </message>
 </context>
 <context>
@@ -927,7 +935,7 @@
     <name>TweetConversationPage</name>
     <message>
         <source>Thread</source>
-        <translation>帖子</translation>
+        <translation>回复</translation>
     </message>
 </context>
 <context>
@@ -973,7 +981,7 @@
     </message>
     <message>
         <source>Show Thread</source>
-        <translation>显示帖子</translation>
+        <translation>显示回复</translation>
     </message>
 </context>
 <context>

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017-19 Sebastian J. Wolf
+    Copyright (C) 2017-20 Sebastian J. Wolf
 
     This file is part of Piepmatz.
 
@@ -388,7 +388,8 @@ function getMediaFileName(tweet, mediaUrl) {
     if (tweet.retweeted_status) {
         fileNamePrefix = tweet.retweeted_status.user.screen_name + "_" + Qt.formatDate(Functions.getValidDate(tweet.retweeted_status ? tweet.retweeted_status.created_at : tweet.created_at), "yyyy-MM-dd");
     }
-    return fileNamePrefix + "_" + mediaUrl.substring(mediaUrl.lastIndexOf("/") + 1);
+    var lastIndexOf = (mediaUrl.indexOf("?") > -1) ? mediaUrl.indexOf("?") : mediaUrl.length;
+    return fileNamePrefix + "_" + mediaUrl.substring(mediaUrl.lastIndexOf("/") + 1, lastIndexOf);
 }
 
 function htmlDecode(input)

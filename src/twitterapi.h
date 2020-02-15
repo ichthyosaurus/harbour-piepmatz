@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017-19 Sebastian J. Wolf
+    Copyright (C) 2017-20 Sebastian J. Wolf
                   2020 Mirian Margiani
 
     This file is part of Piepmatz.
@@ -171,6 +171,8 @@ signals:
     void showStatusError(const QString &errorMessage);
     void showUserSuccessful(const QVariantMap &result);
     void showUserError(const QString &errorMessage);
+    void showUserByIdSuccessful(const QVariantMap &result);
+    void showUserByIdError(const QString &errorMessage);
     void followUserSuccessful(const QVariantMap &result);
     void followUserError(const QString &errorMessage);
     void unfollowUserSuccessful(const QVariantMap &result);

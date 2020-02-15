@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017-19 Sebastian J. Wolf
+    Copyright (C) 2017-20 Sebastian J. Wolf
 
     This file is part of Piepmatz.
 
@@ -30,6 +30,8 @@
 #include "o1requestor.h"
 #include "twitterapi.h"
 #include "locationinformation.h"
+#include "dbusinterface.h"
+#include "dbusadaptor.h"
 //#include "wagnis/wagnis.h"
 
 class AccountModel : public QAbstractListModel
@@ -63,6 +65,8 @@ public:
     Q_INVOKABLE void setDisplayImageDescriptions(const bool &displayImageDescriptions);
     Q_INVOKABLE bool getUseSecretIdentity();
     Q_INVOKABLE void setUseSecretIdentity(const bool &useSecretIdentity);
+    Q_INVOKABLE bool getUseOpenWith();
+    Q_INVOKABLE void setUseOpenWith(const bool &useOpenWith);
     Q_INVOKABLE QString getSecretIdentityName();
     Q_INVOKABLE void setSecretIdentityName(const QString &secretIdentityName);
     Q_INVOKABLE QString getFontSize();
@@ -74,6 +78,7 @@ public:
 
     TwitterApi *getTwitterApi();
     LocationInformation *getLocationInformation();
+    DBusAdaptor *getDBusAdaptor();
     //Wagnis *getWagnis();
 
 signals:
@@ -113,11 +118,14 @@ private:
     QVariantList otherAccounts;
     bool secretIdentity;
     O1Requestor *secretIdentityRequestor = nullptr;
+    DBusInterface *dbusInterface;
 
     void obtainEncryptionKey();
     void initializeEnvironment();
     void readOtherAccounts();
     void initializeSecretIdentity();
+    void initializeOpenWith();
+    void removeOpenWith();
 
 };
 

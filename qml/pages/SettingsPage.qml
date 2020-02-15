@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017-19 Sebastian J. Wolf
+    Copyright (C) 2017-20 Sebastian J. Wolf
 
     This file is part of Piepmatz.
 
@@ -277,6 +277,15 @@ Page {
                         var linkPreviewMode = ( index === 0 ? "always" : ( index === 1 ? "wifiOnly" : "never" ) );
                         accountModel.setLinkPreviewMode(linkPreviewMode);
                     }
+                }
+            }
+
+            TextSwitch {
+                checked: accountModel.getUseOpenWith()
+                text: qsTr("Open-with menu integration")
+                description: qsTr("Integrate Piepmatz into open-with menu of Sailfish OS")
+                onCheckedChanged: {
+                    accountModel.setUseOpenWith(checked);
                 }
             }
 

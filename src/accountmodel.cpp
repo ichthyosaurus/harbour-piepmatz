@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017-19 Sebastian J. Wolf
+    Copyright (C) 2017-20 Sebastian J. Wolf
 
     This file is part of Piepmatz.
 
@@ -27,12 +27,15 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QNetworkConfiguration>
+#include <QTextStream>
+#include <QProcess>
 
 const char SETTINGS_IMAGE_PATH[] = "settings/imagePath";
 const char SETTINGS_USE_EMOJI[] = "settings/useEmojis";
 const char SETTINGS_USE_LOADING_ANIMATIONS[] = "settings/useLoadingAnimations";
 const char SETTINGS_USE_SWIPE_NAVIGATION[] = "settings/useSwipeNavigation";
 const char SETTINGS_USE_SECRET_IDENTITY[] = "settings/useSecretIdentity";
+const char SETTINGS_USE_OPEN_WITH[] = "settings/useOpenWith";
 const char SETTINGS_SECRET_IDENTITY_NAME[] = "settings/secretIdentityName";
 const char SETTINGS_DISPLAY_IMAGE_DESCRIPTIONS[] = "settings/displayImageDescriptions";
 const char SETTINGS_FONT_SIZE[] = "settings/fontSize";
@@ -71,6 +74,12 @@ void AccountModel::initializeEnvironment()
     readOtherAccounts();
     requestor = new O1Requestor(manager, o1, this);
     this->initializeSecretIdentity();
+    if (this->getUseOpenWith()) {
+        this->initializeOpenWith();
+    } else {
+        this->removeOpenWith();
+    }
+    this->dbusInterface = new DBusInterface(this);
 
     //twitterApi = new TwitterApi(requestor, manager, wagnis, this);
     twitterApi = new TwitterApi(requestor, manager, secretIdentityRequestor, this);
@@ -230,6 +239,21 @@ void AccountModel::setUseSecretIdentity(const bool &useSecretIdentity)
     settings.setValue(SETTINGS_USE_SECRET_IDENTITY, useSecretIdentity);
 }
 
+bool AccountModel::getUseOpenWith()
+{
+    return settings.value(SETTINGS_USE_OPEN_WITH, true).toBool();
+}
+
+void AccountModel::setUseOpenWith(const bool &useOpenWith)
+{
+    settings.setValue(SETTINGS_USE_OPEN_WITH, useOpenWith);
+    if (useOpenWith) {
+        this->initializeOpenWith();
+    } else {
+        this->removeOpenWith();
+    }
+}
+
 QString AccountModel::getSecretIdentityName()
 {
     return settings.value(SETTINGS_SECRET_IDENTITY_NAME, "").toString();
@@ -290,6 +314,11 @@ TwitterApi *AccountModel::getTwitterApi()
 LocationInformation *AccountModel::getLocationInformation()
 {
     return this->locationInformation;
+}
+
+DBusAdaptor *AccountModel::getDBusAdaptor()
+{
+    return this->dbusInterface->getDBusAdaptor();
 }
 
 //Wagnis *AccountModel::getWagnis()
@@ -434,6 +463,71 @@ void AccountModel::initializeSecretIdentity()
             qDebug() << "ERROR initializing secret identity!";
         }
     }
+}
+
+void AccountModel::initializeOpenWith()
+{
+    qDebug() << "AccountModel::initializeOpenWith";
+
+    qDebug() << "Checking standard open URL file...";
+    QString openUrlFilePath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/open-url.desktop";
+    if (QFile::exists(openUrlFilePath)) {
+        qDebug() << "Standard open URL file exists, good!";
+    } else {
+        qDebug() << "Copying standard open URL file to " << openUrlFilePath;
+        QFile::copy("/usr/share/applications/open-url.desktop", openUrlFilePath);
+        QProcess::startDetached("update-desktop-database " + QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
+    }
+
+    QString desktopFilePath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/harbour-piepmatz-open-url.desktop";
+    QFile desktopFile(desktopFilePath);
+    if (!desktopFile.exists()) {
+        qDebug() << "Creating Open-With file at " << desktopFile.fileName();
+        if (desktopFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream fileOut(&desktopFile);
+            fileOut.setCodec("UTF-8");
+            fileOut << QString("[Desktop Entry]").toUtf8() << "\n";
+            fileOut << QString("Type=Application").toUtf8() << "\n";
+            fileOut << QString("Name=Piepmatz").toUtf8() << "\n";
+            fileOut << QString("Icon=harbour-piepmatz").toUtf8() << "\n";
+            fileOut << QString("NotShowIn=X-MeeGo;").toUtf8() << "\n";
+            fileOut << QString("MimeType=text/html;x-scheme-handler/http;x-scheme-handler/https;").toUtf8() << "\n";
+            fileOut << QString("X-Maemo-Service=de.ygriega.piepmatz").toUtf8() << "\n";
+            fileOut << QString("X-Maemo-Method=de.ygriega.piepmatz.openUrl").toUtf8() << "\n";
+            fileOut << QString("Hidden=true;").toUtf8() << "\n";
+            fileOut.flush();
+            desktopFile.close();
+            QProcess::startDetached("update-desktop-database " + QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
+        }
+    }
+    QString dbusPathName = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/dbus-1/services";
+    QDir dbusPath(dbusPathName);
+    if (!dbusPath.exists()) {
+        qDebug() << "Creating D-Bus directory " << dbusPathName;
+        dbusPath.mkpath(dbusPathName);
+    }
+    QString dbusServiceFileName = dbusPathName + "/de.ygriega.piepmatz.service";
+    QFile dbusServiceFile(dbusServiceFileName);
+    if (!dbusServiceFile.exists()) {
+        qDebug() << "Creating D-Bus service file at " << dbusServiceFile.fileName();
+        if (dbusServiceFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream fileOut(&dbusServiceFile);
+            fileOut.setCodec("UTF-8");
+            fileOut << QString("[D-BUS Service]").toUtf8() << "\n";
+            fileOut << QString("Name=de.ygriega.piepmatz").toUtf8() << "\n";
+            fileOut << QString("Exec=/usr/bin/invoker -s --type=silica-qt5 /usr/bin/harbour-piepmatz").toUtf8() << "\n";
+            fileOut.flush();
+            dbusServiceFile.close();
+        }
+    }
+}
+
+void AccountModel::removeOpenWith()
+{
+    qDebug() << "AccountModel::removeOpenWith";
+    QFile::remove(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/harbour-piepmatz-open-url.desktop");
+    QFile::remove(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/dbus-1/services/de.ygriega.piepmatz.service");
+    QProcess::startDetached("update-desktop-database " + QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
 }
 
 int AccountModel::rowCount(const QModelIndex&) const {
