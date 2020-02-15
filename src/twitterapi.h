@@ -283,8 +283,8 @@ private slots:
     void handleHomeTimelineLoadMoreFinished(FINISHED_ARGS(ApiResultList));
     void handleShowStatusError(FAILURE_ARGS);
     void handleUserTimelineError(FAILURE_ARGS);
-    void handleFollowUserFinished();
-    void handleUnfollowUserFinished();
+    void handleFollowUserFinished(FINISHED_ARGS(ApiResultMap));
+    void handleUnfollowUserFinished(FINISHED_ARGS(ApiResultMap));
 
     void handleSearchTweetsError(QNetworkReply::NetworkError error);
     void handleSearchTweetsFinished();

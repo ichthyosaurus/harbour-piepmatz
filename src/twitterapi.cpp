@@ -354,6 +354,7 @@ void TwitterApi::friends(const QString &screenName, const QString &cursor)
     params["count"] = "200";
     params["skip_status"] = "true";
     params["include_user_entities"] = "true";
+    if (!cursor.isEmpty()) params["cursor"] = cursor;
     genericRequest(API_FRIENDS_LIST, STANDARD_REQ(TwitterApi::friends), true, params, true);
 }
 
@@ -1098,14 +1099,11 @@ void TwitterApi::handleShowStatusError(const QString &title, QNetworkReply *repl
     }
 }
 
-void TwitterApi::handleFollowUserFinished()
+void TwitterApi::handleFollowUserFinished(const QString &title, QNetworkReply *reply, ApiResultMap successSignal, ApiResultError errorSignal)
 {
-    qDebug() << "TwitterApi::handleFollowUserFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    qDebug() << "TwitterApi::handleFollowUserFinished:" << title;
     reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
+    if (reply->error() != QNetworkReply::NoError) return;
 
     QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
     if (jsonDocument.isObject()) {
@@ -1115,20 +1113,17 @@ void TwitterApi::handleFollowUserFinished()
         // -> "Actions taken in this method are asynchronous. Changes will be eventually consistent."
         responseObject.remove("following");
         responseObject.insert("following", QJsonValue(true));
-        emit followUserSuccessful(responseObject.toVariantMap());
+        emit (this->*successSignal)(responseObject.toVariantMap());
     } else {
-        emit followUserError(DEFAULT_ERROR_MESSAGE);
+        emit (this->*errorSignal)(DEFAULT_ERROR_MESSAGE);
     }
 }
 
-void TwitterApi::handleUnfollowUserFinished()
+void TwitterApi::handleUnfollowUserFinished(const QString &title, QNetworkReply *reply, ApiResultMap successSignal, ApiResultError errorSignal)
 {
-    qDebug() << "TwitterApi::handleUnfollowUserFinished";
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    qDebug() << "TwitterApi::handleUnfollowUserFinished:" << title;
     reply->deleteLater();
-    if (reply->error() != QNetworkReply::NoError) {
-        return;
-    }
+    if (reply->error() != QNetworkReply::NoError) return;
 
     QJsonDocument jsonDocument = QJsonDocument::fromJson(reply->readAll());
     if (jsonDocument.isObject()) {
@@ -1136,9 +1131,9 @@ void TwitterApi::handleUnfollowUserFinished()
         // Sometimes, Twitter still says "following": false here - strange isn't it?
         responseObject.remove("following");
         responseObject.insert("following", QJsonValue(false));
-        emit unfollowUserSuccessful(responseObject.toVariantMap());
+        emit (this->*successSignal)(responseObject.toVariantMap());
     } else {
-        emit unfollowUserError(DEFAULT_ERROR_MESSAGE);
+        emit (this->*errorSignal)(DEFAULT_ERROR_MESSAGE);
     }
 }
 
