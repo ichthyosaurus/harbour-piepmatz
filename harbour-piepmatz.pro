@@ -26,6 +26,7 @@ SOURCES += src/harbour-piepmatz.cpp \
     src/accountmodel.cpp \
     src/dbusadaptor.cpp \
     src/dbusinterface.cpp \
+    src/emojisearchworker.cpp \
     src/twitterapi.cpp \
     src/timelinemodel.cpp \
     src/covermodel.cpp \
@@ -53,7 +54,8 @@ OTHER_FILES += qml/harbour-piepmatz.qml \
     rpm/harbour-piepmatz.spec \
     rpm/harbour-piepmatz.yaml \
     translations/*.ts \
-    harbour-piepmatz.desktop
+    harbour-piepmatz.desktop \
+    db/emojis.db
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256
 
@@ -103,13 +105,17 @@ ICONPATH = /usr/share/icons/hicolor
 piepmatz.desktop.path = /usr/share/applications/
 piepmatz.desktop.files = harbour-piepmatz.desktop
 
+database.files = db
+database.path = /usr/share/$${TARGET}
+
 INSTALLS += 86.png 108.png 128.png 172.png 256.png \
-            piepmatz.desktop gui images
+            piepmatz.desktop gui images database
 
 HEADERS += \
     src/accountmodel.h \
     src/dbusadaptor.h \
     src/dbusinterface.h \
+    src/emojisearchworker.h \
     src/twitterapi.h \
     src/timelinemodel.h \
     src/covermodel.h \
